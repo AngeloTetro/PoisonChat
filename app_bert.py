@@ -1,4 +1,4 @@
-# --- app_bert.py (Streamlit Web App for Italian BERT - CON NUOVO LOGO) ---
+# --- app_bert.py (Streamlit Web App for Italian BERT - LOGO GRANDE CENTRALE, TESTO PULITO) ---
 
 import streamlit as st
 import torch
@@ -8,17 +8,17 @@ import os
 from huggingface_hub import hf_hub_download
 
 # --- Interfaccia Utente di Streamlit (Configurazione, DEVE ESSERE LA PRIMA COSA!) ---
-# Imposta il favicon (l'icona nella scheda del browser) con il nuovo logo
+# Imposta il favicon (l'icona nella scheda del browser)
 st.set_page_config(
     page_title="PoisonChat",
     layout="centered",
-    page_icon="poisonchatbetter.png", # <--- Aggiornato qui!
+    page_icon="poisonchatbetter.png", # Il tuo favicon
     initial_sidebar_state="collapsed"
 )
 
 # --- Configurazione ---
 HF_MODEL_REPO = "AngeloTetro/PoisonChat"
-HF_SUBFOLDER_NAME = "bert_italian_category_webapp_model" 
+HF_SUBFOLDER_NAME = "bert_italian_category_webapp_model"
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # --- Caricamento del Modello, Tokenizer e Label Encoder ---
@@ -33,7 +33,7 @@ def load_model_and_tokenizer():
             label_encoder_path = hf_hub_download(repo_id=HF_MODEL_REPO, filename="label_encoder.joblib", subfolder=HF_SUBFOLDER_NAME)
             label_encoder = joblib.load(label_encoder_path)
 
-            st.success("Modello PoisonChat caricato con successo!")
+            # Rimosso il messaggio st.success qui, non apparirà più
             return tokenizer, model, label_encoder
         except Exception as e:
             st.error(f"Errore critico durante il caricamento del modello: {e}")
@@ -47,10 +47,10 @@ def predict_category(text):
     inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512).to(DEVICE)
     with torch.no_grad():
         outputs = model(**inputs)
-    
+
     logits = outputs.logits
     probabilities = torch.softmax(logits, dim=1)
-    
+
     predicted_id = torch.argmax(probabilities, dim=1).item()
     predicted_category = label_encoder.inverse_transform([predicted_id])[0]
     predicted_probability = probabilities[0][predicted_id].item()
@@ -59,24 +59,21 @@ def predict_category(text):
         label_encoder.inverse_transform([i])[0]: prob.item()
         for i, prob in enumerate(probabilities[0])
     }
-    
+
     return predicted_category, predicted_probability, all_probabilities
 
 # --- Interfaccia Utente di Streamlit ---
 
-# Utilizziamo le colonne per posizionare il logo e il titolo sulla stessa riga
-col_logo, col_title = st.columns([0.8, 4]) # Una colonna piccola per il logo, una grande per il titolo
+# Centra il logo grande
+col1, col2, col3 = st.columns([1, 2, 1]) # Colonna centrale per il logo
+with col2:
+    st.image("poisonchatbetter.png", width=250) # Logo più grande, puoi regolare la larghezza
 
-with col_logo:
-    # st.image per inserire il logo nel sito con il nuovo file
-    st.image("poisonchatbetter.png", width=60) # <--- Aggiornato qui! Regola la larghezza come desideri
+# Titolo principale centrato
+st.markdown("<h1 style='text-align: center; color: white;'>PoisonChat</h1>", unsafe_allow_html=True)
 
-with col_title:
-    # Il titolo principale accanto al logo
-    st.markdown("<h1 style='color: white; margin-top: 0px;'>PoisonChat</h1>", unsafe_allow_html=True)
-
-# Il sottotitolo rimane centrato
-st.markdown("<h3 style='text-align: center; color: #ADD8E6;'>Classificatore di Categorie di Conversazione</h1>", unsafe_allow_html=True)
+# Sottotitolo modificato e centrato
+st.markdown("<h3 style='text-align: center; color: #ADD8E6;'>Classificatore di Conversazioni</h1>", unsafe_allow_html=True) # Testo modificato
 
 # Testo descrittivo centrato
 st.markdown("""
@@ -94,7 +91,7 @@ if st.button("Classifica Categoria", use_container_width=True, type="primary"):
     if user_input:
         with st.spinner("Classificazione in corso..."):
             predicted_category, predicted_probability, all_probs = predict_category(user_input)
-            
+
             st.success(f"**Categoria Predetta:** {predicted_category}")
             st.write(f"**Confidenza:** {predicted_probability:.2%}")
 
