@@ -1,4 +1,4 @@
-# --- app_bert.py (Streamlit Web App for Italian BERT - CON LOGO E FAVICON) ---
+# --- app_bert.py (Streamlit Web App for Italian BERT - ESTETICA MIGLIORATA) ---
 
 import streamlit as st
 import torch
@@ -8,8 +8,12 @@ import os
 from huggingface_hub import hf_hub_download
 
 # --- Interfaccia Utente di Streamlit (Configurazione, DEVE ESSERE LA PRIMA COSA!) ---
-# Imposta il favicon (l'icona nella scheda del browser)
-st.set_page_config(page_title="PoisonChat", layout="centered", page_icon="poisonchat.png")
+st.set_page_config(
+    page_title="PoisonChat",
+    layout="centered",
+    page_icon="poisonchat.png", # Il tuo favicon
+    initial_sidebar_state="collapsed" # Per un layout più pulito se non si usa la sidebar
+)
 
 # --- Configurazione ---
 HF_MODEL_REPO = "AngeloTetro/PoisonChat"
@@ -19,42 +23,67 @@ DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # --- Caricamento del Modello, Tokenizer e Label Encoder ---
 @st.cache_resource
 def load_model_and_tokenizer():
-    try:
-        tokenizer = BertTokenizer.from_pretrained(HF_MODEL_REPO, subfolder=HF_SUBFOLDER_NAME)
-        model = BertForSequenceClassification.from_pretrained(HF_MODEL_REPO, subfolder=HF_SUBFOLDER_NAME).to(DEVICE)
-        model.eval()
+    with st.spinner("Caricamento modello PoisonChat..."): # Spinner migliorato
+        try:
+            tokenizer = BertTokenizer.from_pretrained(HF_MODEL_REPO, subfolder=HF_SUBFOLDER_NAME)
+            model = BertForSequenceClassification.from_pretrained(HF_MODEL_REPO, subfolder=HF_SUBFOLDER_NAME).to(DEVICE)
+            model.eval()
 
-        label_encoder_path = hf_hub_download(repo_id=HF_MODEL_REPO, filename="label_encoder.joblib", subfolder=HF_SUBFOLDER_NAME)
-        label_encoder = joblib.load(label_encoder_path)
+            label_encoder_path = hf_hub_download(repo_id=HF_MODEL_REPO, filename="label_encoder.joblib", subfolder=HF_SUBFOLDER_NAME)
+            label_encoder = joblib.load(label_encoder_path)
 
-        st.success(f"Modello BERT, tokenizer e codificatore di etichette caricati da Hugging Face Hub: {HF_MODEL_REPO}/{HF_SUBFOLDER_NAME}!")
-        return tokenizer, model, label_encoder
-    except Exception as e:
-        st.error(f"Errore durante il caricamento del modello da Hugging Face Hub: {e}")
-        st.info(f"Dettaglio dell'errore: {e}")
-        st.info(f"Assicurati che il repository '{HF_MODEL_REPO}' e la sottocartella '{HF_SUBFOLDER_NAME}' siano corretti e che tutti i file del modello siano stati caricati al loro interno.")
-        st.stop()
+            st.success("Modello PoisonChat caricato con successo!") # Messaggio di successo più conciso
+            return tokenizer, model, label_encoder
+        except Exception as e:
+            st.error(f"Errore critico durante il caricamento del modello: {e}")
+            st.info(f"Controlla il repository {HF_MODEL_REPO} e la sottocartella {HF_SUBFOLDER_NAME} su Hugging Face Hub.")
+            st.stop()
 
 tokenizer, model, label_encoder = load_model_and_tokenizer()
 
-# --- Aggiungi l'immagine del logo all'inizio dell'app ---
-# Assicurati che "poisonchat.png" sia nella stessa cartella di app_bert.py su GitHub
-st.image("poisonchat.png", width=150) # Puoi regolare la larghezza del logo qui
+# --- Funzione di Predizione ---
+def predict_category(text):
+    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512).to(DEVICE)
+    with torch.no_grad():
+        outputs = model(**inputs)
+    
+    logits = outputs.logits
+    probabilities = torch.softmax(logits, dim=1)
+    
+    predicted_id = torch.argmax(probabilities, dim=1).item()
+    predicted_category = label_encoder.inverse_transform([predicted_id])[0]
+    predicted_probability = probabilities[0][predicted_id].item()
+
+    all_probabilities = {
+        label_encoder.inverse_transform([i])[0]: prob.item()
+        for i, prob in enumerate(probabilities[0])
+    }
+    
+    return predicted_category, predicted_probability, all_probabilities
 
 # --- Interfaccia Utente di Streamlit ---
 
-# Titolo principale
-st.header("PoisonChat: Classificatore di Categorie di Conversazione") 
+# Centra il logo - usa colonne per il controllo del layout
+col1, col2, col3 = st.columns([1, 2, 1]) # Colonna centrale più larga
+with col2:
+    st.image("poisonchat.png", width=200) # Larghezza leggermente aumentata, puoi regolarla
+    st.markdown("<h1 style='text-align: center; color: white;'>PoisonChat</h1>", unsafe_allow_html=True) # Titolo centrato con HTML
+    st.markdown("<h3 style='text-align: center; color: #ADD8E6;'>Classificatore di Categorie di Conversazione</h1>", unsafe_allow_html=True) # Sottotitolo più piccolo e centrato
+    # Usiamo <h3> per il sottotitolo e un colore chiaro per contrasto.
 
-# Testo descrittivo senza collegamenti
 st.markdown("""
+<p style='text-align: center; font-size: 1.1em;'>
 Questa applicazione classifica il testo di una conversazione in una delle categorie predefinite, utilizzando un modello BERT Italiano addestrato. Aiuta a identificare la natura delle interazioni.
-""")
+</p>
+""", unsafe_allow_html=True) # Testo descrittivo centrato e leggermente più grande
+
+st.write("---") # Una linea separatrice
 
 st.subheader("Inserisci il testo della conversazione:")
 user_input = st.text_area("Testo della conversazione:", height=150, placeholder="Es: Ciao, come stai? Vorrei parlare di come risolvere la nostra discussione di ieri.")
 
-if st.button("Classifica Categoria"):
+# Pulsante con stile migliorato
+if st.button("Classifica Categoria", use_container_width=True, type="primary"): # type="primary" per un colore accentato
     if user_input:
         with st.spinner("Classificazione in corso..."):
             predicted_category, predicted_probability, all_probs = predict_category(user_input)
@@ -62,13 +91,13 @@ if st.button("Classifica Categoria"):
             st.success(f"**Categoria Predetta:** {predicted_category}")
             st.write(f"**Confidenza:** {predicted_probability:.2%}")
 
-            st.subheader("Dettaglio delle Probabilità:")
-            sorted_probs = sorted(all_probs.items(), key=lambda item: item[1], reverse=True)
-            for category, prob in sorted_probs:
-                st.write(f"- {category}: {prob:.2%}")
+            # Dettaglio delle Probabilità in un expander (più pulito)
+            with st.expander("Mostra Dettaglio delle Probabilità"):
+                sorted_probs = sorted(all_probs.items(), key=lambda item: item[1], reverse=True)
+                for category, prob in sorted_probs:
+                    st.write(f"- {category}: {prob:.2%}")
     else:
         st.warning("Per favore, inserisci del testo per la classificazione.")
 
-st.markdown("---")
-# Testo del footer senza collegamenti
+st.write("---") # Un'altra linea separatrice
 st.info("Sviluppato con Streamlit e Hugging Face Transformers per PoisonChat.")
