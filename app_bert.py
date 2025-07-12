@@ -1,4 +1,4 @@
-# --- app_bert.py (Streamlit Web App for Italian BERT - LOGO GRANDE CENTRALE CSS) ---
+# --- app_bert.py (Streamlit Web App for Italian BERT - LOGO GRANDE CENTRALE TRAMITE ST.IMAGE) ---
 
 import streamlit as st
 import torch
@@ -11,7 +11,7 @@ from huggingface_hub import hf_hub_download
 st.set_page_config(
     page_title="PoisonChat",
     layout="centered",
-    page_icon="poisonchatbetter.png",
+    page_icon="poisonchatbetter.png", # Il tuo favicon
     initial_sidebar_state="collapsed"
 )
 
@@ -32,7 +32,6 @@ def load_model_and_tokenizer():
             label_encoder_path = hf_hub_download(repo_id=HF_MODEL_REPO, filename="label_encoder.joblib", subfolder=HF_SUBFOLDER_NAME)
             label_encoder = joblib.load(label_encoder_path)
 
-            # Rimosso il messaggio st.success qui, non apparirà più
             return tokenizer, model, label_encoder
         except Exception as e:
             st.error(f"Errore critico durante il caricamento del modello: {e}")
@@ -63,25 +62,11 @@ def predict_category(text):
 
 # --- Interfaccia Utente di Streamlit ---
 
-# Centra il logo grande usando HTML/CSS per maggiore precisione
-col1, col2, col3 = st.columns([1, 2, 1]) # Mantengo le colonne, ma la centratura avviene con CSS
+# Centra il logo grande con st.image e colonne
+col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
-    # st.image è stato sostituito con st.markdown + <img> con CSS per centrarlo
-    st.markdown(
-        """
-        <style>
-        .centered-image {
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-            width: 250px; /* Regola la larghezza qui se necessario */
-        }
-        </style>
-        <img src="app/static/poisonchatbetter.png" class="centered-image">
-        """,
-        unsafe_allow_html=True
-    )
-
+    st.image("poisonchatbetter.png", width=250) # Torna a st.image, path diretto
+    
 # Titolo principale centrato
 st.markdown("<h1 style='text-align: center; color: white;'>PoisonChat</h1>", unsafe_allow_html=True)
 
@@ -98,6 +83,7 @@ Questa applicazione classifica il testo di una conversazione in una delle catego
 st.write("---") # Una linea separatrice
 
 st.subheader("Inserisci il testo della conversazione:")
+# Rimuovi l'etichetta dell'area di testo, dato che c'è già un subheader
 user_input = st.text_area("", height=150, placeholder="Es: Ciao, come stai? Vorrei parlare di come risolvere la nostra discussione di ieri.")
 
 if st.button("Classifica Categoria", use_container_width=True, type="primary"):
