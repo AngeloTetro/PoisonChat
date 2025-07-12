@@ -1,4 +1,4 @@
-# --- app_bert.py (Streamlit Web App for Italian BERT - LOGO GRANDE CENTRALE TRAMITE ST.IMAGE) ---
+# --- app_bert.py (Streamlit Web App for Italian BERT - LOGO E FAVICON DISTINTI) ---
 
 import streamlit as st
 import torch
@@ -8,10 +8,11 @@ import os
 from huggingface_hub import hf_hub_download
 
 # --- Interfaccia Utente di Streamlit (Configurazione, DEVE ESSERE LA PRIMA COSA!) ---
+# Imposta il favicon con il file poisonchatbetter.png
 st.set_page_config(
     page_title="PoisonChat",
     layout="centered",
-    page_icon="poisonchatshifted.png", # Il tuo favicon
+    page_icon="poisonchatbetter.png", # <--- Favicon: poisonchatbetter.png
     initial_sidebar_state="collapsed"
 )
 
@@ -62,11 +63,11 @@ def predict_category(text):
 
 # --- Interfaccia Utente di Streamlit ---
 
-# Centra il logo grande con st.image e colonne
+# Centra il logo grande con st.image
 col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
-    st.image("poisonchatbetter.png", width=250) # Torna a st.image, path diretto
-    
+    st.image("poisonchatshifted.png", width=250) # <--- Logo grande nel sito: poisonchatshifted.png
+
 # Titolo principale centrato
 st.markdown("<h1 style='text-align: center; color: white;'>PoisonChat</h1>", unsafe_allow_html=True)
 
@@ -83,7 +84,6 @@ Questa applicazione classifica il testo di una conversazione in una delle catego
 st.write("---") # Una linea separatrice
 
 st.subheader("Inserisci il testo della conversazione:")
-# Rimuovi l'etichetta dell'area di testo, dato che c'è già un subheader
 user_input = st.text_area("", height=150, placeholder="Es: Ciao, come stai? Vorrei parlare di come risolvere la nostra discussione di ieri.")
 
 if st.button("Classifica Categoria", use_container_width=True, type="primary"):
