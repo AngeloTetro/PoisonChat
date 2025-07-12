@@ -1,4 +1,4 @@
-# --- app_bert.py (Streamlit Web App for Italian BERT - LOGO GRANDE CENTRALE, TESTO PULITO) ---
+# --- app_bert.py (Streamlit Web App for Italian BERT - LOGO GRANDE CENTRALE CSS) ---
 
 import streamlit as st
 import torch
@@ -8,11 +8,10 @@ import os
 from huggingface_hub import hf_hub_download
 
 # --- Interfaccia Utente di Streamlit (Configurazione, DEVE ESSERE LA PRIMA COSA!) ---
-# Imposta il favicon (l'icona nella scheda del browser)
 st.set_page_config(
     page_title="PoisonChat",
     layout="centered",
-    page_icon="poisonchatbetter.png", # Il tuo favicon
+    page_icon="poisonchatbetter.png",
     initial_sidebar_state="collapsed"
 )
 
@@ -64,16 +63,30 @@ def predict_category(text):
 
 # --- Interfaccia Utente di Streamlit ---
 
-# Centra il logo grande
-col1, col2, col3 = st.columns([1, 2, 1]) # Colonna centrale per il logo
+# Centra il logo grande usando HTML/CSS per maggiore precisione
+col1, col2, col3 = st.columns([1, 2, 1]) # Mantengo le colonne, ma la centratura avviene con CSS
 with col2:
-    st.image("poisonchatbetter.png", width=250) # Logo più grande, puoi regolare la larghezza
+    # st.image è stato sostituito con st.markdown + <img> con CSS per centrarlo
+    st.markdown(
+        """
+        <style>
+        .centered-image {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 250px; /* Regola la larghezza qui se necessario */
+        }
+        </style>
+        <img src="app/static/poisonchatbetter.png" class="centered-image">
+        """,
+        unsafe_allow_html=True
+    )
 
 # Titolo principale centrato
 st.markdown("<h1 style='text-align: center; color: white;'>PoisonChat</h1>", unsafe_allow_html=True)
 
 # Sottotitolo modificato e centrato
-st.markdown("<h3 style='text-align: center; color: #ADD8E6;'>Classificatore di Conversazioni</h1>", unsafe_allow_html=True) # Testo modificato
+st.markdown("<h3 style='text-align: center; color: #ADD8E6;'>Classificatore di Conversazioni</h1>", unsafe_allow_html=True)
 
 # Testo descrittivo centrato
 st.markdown("""
@@ -85,7 +98,7 @@ Questa applicazione classifica il testo di una conversazione in una delle catego
 st.write("---") # Una linea separatrice
 
 st.subheader("Inserisci il testo della conversazione:")
-user_input = st.text_area("Testo della conversazione:", height=150, placeholder="Es: Ciao, come stai? Vorrei parlare di come risolvere la nostra discussione di ieri.")
+user_input = st.text_area("", height=150, placeholder="Es: Ciao, come stai? Vorrei parlare di come risolvere la nostra discussione di ieri.")
 
 if st.button("Classifica Categoria", use_container_width=True, type="primary"):
     if user_input:
@@ -103,4 +116,4 @@ if st.button("Classifica Categoria", use_container_width=True, type="primary"):
         st.warning("Per favore, inserisci del testo per la classificazione.")
 
 st.write("---")
-st.info("Sviluppato con Streamlit e Hugging Face Transformers per PoisonChat.")
+st.info("Sviluppato con Streamlit e Hugging Face Transformers.")
