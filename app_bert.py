@@ -11,7 +11,7 @@ from huggingface_hub import hf_hub_download
 st.set_page_config(
     page_title="PoisonChat",
     layout="centered",
-    page_icon="poisonchatbetter.png", # Il tuo favicon
+    page_icon="poisonchatshifted.png", # Il tuo favicon
     initial_sidebar_state="collapsed"
 )
 
