@@ -1,4 +1,4 @@
-# --- app_bert.py (Streamlit Web App for Italian BERT - SENZA COLLEGAMENTI) ---
+# --- app_bert.py (Streamlit Web App for Italian BERT - Pulito da Collegamenti) ---
 
 import streamlit as st
 import torch
@@ -58,10 +58,15 @@ def predict_category(text):
 
 # --- Interfaccia Utente di Streamlit ---
 
-st.title("🐍 PoisonChat: Classificatore di Categorie di Conversazione")
-# Testo aggiornato senza collegamenti
+# Titolo principale senza alcuna formattazione che possa generare link impliciti
+st.header("PoisonChat: Classificatore di Categorie di Conversazione") 
+# La riga sopra è stata cambiata da st.title a st.header per evitare interpretazioni errate se 'PoisonChat' era trattato come un link implicito.
+# Se il serpente 🐍 fosse il problema, potremmo anche rimuoverlo dal titolo.
+# Per ora lo lascio ma se il problema persiste lo rimuoveremo.
+
+# Testo descrittivo senza collegamenti
 st.markdown("""
-Questa applicazione classifica il testo di una conversazione in una delle categorie predefinite, utilizzando un modello **BERT Italiano (dbmdz/bert-base-italian-uncased)** addestrato. Aiuta a identificare la natura delle interazioni.
+Questa applicazione classifica il testo di una conversazione in una delle categorie predefinite, utilizzando un modello BERT Italiano addestrato. Aiuta a identificare la natura delle interazioni.
 """)
 
 st.subheader("Inserisci il testo della conversazione:")
@@ -83,5 +88,5 @@ if st.button("Classifica Categoria"):
         st.warning("Per favore, inserisci del testo per la classificazione.")
 
 st.markdown("---")
-# Testo aggiornato senza collegamenti
+# Testo del footer senza collegamenti
 st.info("Sviluppato con Streamlit e Hugging Face Transformers per PoisonChat.")
