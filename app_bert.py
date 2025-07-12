@@ -1,4 +1,4 @@
-# --- app_bert.py (Streamlit Web App for Italian BERT - Pulito da Collegamenti) ---
+# --- app_bert.py (Streamlit Web App for Italian BERT - CON LOGO E FAVICON) ---
 
 import streamlit as st
 import torch
@@ -8,7 +8,8 @@ import os
 from huggingface_hub import hf_hub_download
 
 # --- Interfaccia Utente di Streamlit (Configurazione, DEVE ESSERE LA PRIMA COSA!) ---
-st.set_page_config(page_title="PoisonChat", layout="centered")
+# Imposta il favicon (l'icona nella scheda del browser)
+st.set_page_config(page_title="PoisonChat", layout="centered", page_icon="poisonchat.png")
 
 # --- Configurazione ---
 HF_MODEL_REPO = "AngeloTetro/PoisonChat"
@@ -36,33 +37,14 @@ def load_model_and_tokenizer():
 
 tokenizer, model, label_encoder = load_model_and_tokenizer()
 
-# --- Funzione di Predizione ---
-def predict_category(text):
-    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512).to(DEVICE)
-    with torch.no_grad():
-        outputs = model(**inputs)
-    
-    logits = outputs.logits
-    probabilities = torch.softmax(logits, dim=1)
-    
-    predicted_id = torch.argmax(probabilities, dim=1).item()
-    predicted_category = label_encoder.inverse_transform([predicted_id])[0]
-    predicted_probability = probabilities[0][predicted_id].item()
-
-    all_probabilities = {
-        label_encoder.inverse_transform([i])[0]: prob.item()
-        for i, prob in enumerate(probabilities[0])
-    }
-    
-    return predicted_category, predicted_probability, all_probabilities
+# --- Aggiungi l'immagine del logo all'inizio dell'app ---
+# Assicurati che "poisonchat.png" sia nella stessa cartella di app_bert.py su GitHub
+st.image("poisonchat.png", width=150) # Puoi regolare la larghezza del logo qui
 
 # --- Interfaccia Utente di Streamlit ---
 
-# Titolo principale senza alcuna formattazione che possa generare link impliciti
+# Titolo principale
 st.header("PoisonChat: Classificatore di Categorie di Conversazione") 
-# La riga sopra è stata cambiata da st.title a st.header per evitare interpretazioni errate se 'PoisonChat' era trattato come un link implicito.
-# Se il serpente 🐍 fosse il problema, potremmo anche rimuoverlo dal titolo.
-# Per ora lo lascio ma se il problema persiste lo rimuoveremo.
 
 # Testo descrittivo senza collegamenti
 st.markdown("""
