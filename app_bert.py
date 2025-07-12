@@ -1,4 +1,4 @@
-# --- app_bert.py (Streamlit Web App for Italian BERT - CON SOTTOCARTELLE HF) ---
+# --- app_bert.py (Streamlit Web App for Italian BERT - SENZA COLLEGAMENTI) ---
 
 import streamlit as st
 import torch
@@ -12,20 +12,17 @@ st.set_page_config(page_title="PoisonChat", layout="centered")
 
 # --- Configurazione ---
 HF_MODEL_REPO = "AngeloTetro/PoisonChat"
-# NOME DELLA SOTTOCARTELLA ALL'INTERNO DEL REPOSITORY HUGGING FACE
-HF_SUBFOLDER_NAME = "bert_italian_category_webapp_model" # <--- ASSICURATI CHE QUESTO SIA IL NOME ESATTO DELLA CARTELLA CARICATA
+HF_SUBFOLDER_NAME = "bert_italian_category_webapp_model" 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # --- Caricamento del Modello, Tokenizer e Label Encoder ---
 @st.cache_resource
 def load_model_and_tokenizer():
     try:
-        # Carica tokenizer e modello specificando la sottocartella
         tokenizer = BertTokenizer.from_pretrained(HF_MODEL_REPO, subfolder=HF_SUBFOLDER_NAME)
         model = BertForSequenceClassification.from_pretrained(HF_MODEL_REPO, subfolder=HF_SUBFOLDER_NAME).to(DEVICE)
         model.eval()
 
-        # Scarica il label_encoder.joblib specificando la sottocartella
         label_encoder_path = hf_hub_download(repo_id=HF_MODEL_REPO, filename="label_encoder.joblib", subfolder=HF_SUBFOLDER_NAME)
         label_encoder = joblib.load(label_encoder_path)
 
@@ -62,6 +59,7 @@ def predict_category(text):
 # --- Interfaccia Utente di Streamlit ---
 
 st.title("🐍 PoisonChat: Classificatore di Categorie di Conversazione")
+# Testo aggiornato senza collegamenti
 st.markdown("""
 Questa applicazione classifica il testo di una conversazione in una delle categorie predefinite, utilizzando un modello **BERT Italiano (dbmdz/bert-base-italian-uncased)** addestrato. Aiuta a identificare la natura delle interazioni.
 """)
@@ -85,4 +83,5 @@ if st.button("Classifica Categoria"):
         st.warning("Per favore, inserisci del testo per la classificazione.")
 
 st.markdown("---")
+# Testo aggiornato senza collegamenti
 st.info("Sviluppato con Streamlit e Hugging Face Transformers per PoisonChat.")
