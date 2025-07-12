@@ -1,4 +1,4 @@
-# --- app_bert.py (Streamlit Web App for Italian BERT - ESTETICA MIGLIORATA) ---
+# --- app_bert.py (Streamlit Web App for Italian BERT - CON NUOVO LOGO) ---
 
 import streamlit as st
 import torch
@@ -8,11 +8,12 @@ import os
 from huggingface_hub import hf_hub_download
 
 # --- Interfaccia Utente di Streamlit (Configurazione, DEVE ESSERE LA PRIMA COSA!) ---
+# Imposta il favicon (l'icona nella scheda del browser) con il nuovo logo
 st.set_page_config(
     page_title="PoisonChat",
     layout="centered",
-    page_icon="poisonchat.png", # Il tuo favicon
-    initial_sidebar_state="collapsed" # Per un layout più pulito se non si usa la sidebar
+    page_icon="poisonchatbetter.png", # <--- Aggiornato qui!
+    initial_sidebar_state="collapsed"
 )
 
 # --- Configurazione ---
@@ -23,7 +24,7 @@ DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # --- Caricamento del Modello, Tokenizer e Label Encoder ---
 @st.cache_resource
 def load_model_and_tokenizer():
-    with st.spinner("Caricamento modello PoisonChat..."): # Spinner migliorato
+    with st.spinner("Caricamento modello PoisonChat..."):
         try:
             tokenizer = BertTokenizer.from_pretrained(HF_MODEL_REPO, subfolder=HF_SUBFOLDER_NAME)
             model = BertForSequenceClassification.from_pretrained(HF_MODEL_REPO, subfolder=HF_SUBFOLDER_NAME).to(DEVICE)
@@ -32,7 +33,7 @@ def load_model_and_tokenizer():
             label_encoder_path = hf_hub_download(repo_id=HF_MODEL_REPO, filename="label_encoder.joblib", subfolder=HF_SUBFOLDER_NAME)
             label_encoder = joblib.load(label_encoder_path)
 
-            st.success("Modello PoisonChat caricato con successo!") # Messaggio di successo più conciso
+            st.success("Modello PoisonChat caricato con successo!")
             return tokenizer, model, label_encoder
         except Exception as e:
             st.error(f"Errore critico durante il caricamento del modello: {e}")
@@ -63,27 +64,33 @@ def predict_category(text):
 
 # --- Interfaccia Utente di Streamlit ---
 
-# Centra il logo - usa colonne per il controllo del layout
-col1, col2, col3 = st.columns([1, 2, 1]) # Colonna centrale più larga
-with col2:
-    st.image("poisonchat.png", width=200) # Larghezza leggermente aumentata, puoi regolarla
-    st.markdown("<h1 style='text-align: center; color: white;'>PoisonChat</h1>", unsafe_allow_html=True) # Titolo centrato con HTML
-    st.markdown("<h3 style='text-align: center; color: #ADD8E6;'>Classificatore di Categorie di Conversazione</h1>", unsafe_allow_html=True) # Sottotitolo più piccolo e centrato
-    # Usiamo <h3> per il sottotitolo e un colore chiaro per contrasto.
+# Utilizziamo le colonne per posizionare il logo e il titolo sulla stessa riga
+col_logo, col_title = st.columns([0.8, 4]) # Una colonna piccola per il logo, una grande per il titolo
 
+with col_logo:
+    # st.image per inserire il logo nel sito con il nuovo file
+    st.image("poisonchatbetter.png", width=60) # <--- Aggiornato qui! Regola la larghezza come desideri
+
+with col_title:
+    # Il titolo principale accanto al logo
+    st.markdown("<h1 style='color: white; margin-top: 0px;'>PoisonChat</h1>", unsafe_allow_html=True)
+
+# Il sottotitolo rimane centrato
+st.markdown("<h3 style='text-align: center; color: #ADD8E6;'>Classificatore di Categorie di Conversazione</h1>", unsafe_allow_html=True)
+
+# Testo descrittivo centrato
 st.markdown("""
 <p style='text-align: center; font-size: 1.1em;'>
 Questa applicazione classifica il testo di una conversazione in una delle categorie predefinite, utilizzando un modello BERT Italiano addestrato. Aiuta a identificare la natura delle interazioni.
 </p>
-""", unsafe_allow_html=True) # Testo descrittivo centrato e leggermente più grande
+""", unsafe_allow_html=True)
 
 st.write("---") # Una linea separatrice
 
 st.subheader("Inserisci il testo della conversazione:")
 user_input = st.text_area("Testo della conversazione:", height=150, placeholder="Es: Ciao, come stai? Vorrei parlare di come risolvere la nostra discussione di ieri.")
 
-# Pulsante con stile migliorato
-if st.button("Classifica Categoria", use_container_width=True, type="primary"): # type="primary" per un colore accentato
+if st.button("Classifica Categoria", use_container_width=True, type="primary"):
     if user_input:
         with st.spinner("Classificazione in corso..."):
             predicted_category, predicted_probability, all_probs = predict_category(user_input)
@@ -91,7 +98,6 @@ if st.button("Classifica Categoria", use_container_width=True, type="primary"): 
             st.success(f"**Categoria Predetta:** {predicted_category}")
             st.write(f"**Confidenza:** {predicted_probability:.2%}")
 
-            # Dettaglio delle Probabilità in un expander (più pulito)
             with st.expander("Mostra Dettaglio delle Probabilità"):
                 sorted_probs = sorted(all_probs.items(), key=lambda item: item[1], reverse=True)
                 for category, prob in sorted_probs:
@@ -99,5 +105,5 @@ if st.button("Classifica Categoria", use_container_width=True, type="primary"): 
     else:
         st.warning("Per favore, inserisci del testo per la classificazione.")
 
-st.write("---") # Un'altra linea separatrice
+st.write("---")
 st.info("Sviluppato con Streamlit e Hugging Face Transformers per PoisonChat.")
